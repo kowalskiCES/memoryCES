@@ -31,13 +31,16 @@ function createBoard() {
 }
 
 // generates LI items inside UL with stars id.
+var starsLocation = document.getElementById('stars');
 function createStars() {
-    // TODO
+    for (let i = 0; i < STARS_LEVEL.length; i++) {
+        starsLocation.innerHTML += createStar(i);
+    }
 }
 
 // creates the LI for one star
 function createStar(index) {
-    // TODO
+   return '<li><i class="fa fa-star star' + index + '"></i></li>';
 }
 
 // init variables for a new game
@@ -83,17 +86,21 @@ function manageMovement(card) {
 
 // prepares card id using index and symbol
 function generateId(index, symbol) {
-    // TODO
+    return index+'_'+symbol;
 }
 
 // extracts symbol from card id
 function getSymbolFromId(card) {
-    // TODO
+    return//TODO
 }
 
 // creates the LI for one card, with card<index>_<symbol> as id, and the symbol as content.
 function createCard(index, symbol) {
-    // TODO
+    let resID = generateId(index, symbol);
+    let out = '';
+    out += '<li class="card">' + '\n';
+    out += '   <i class="fa fa-'+getSymbolFromId(resID)+'" id="'+resID+'"></i>' + '\n';
+    out += '</li>';
 }
 
  // makes a card visible
@@ -136,13 +143,16 @@ function formatSeconds(seconds)
 }
 
 // calculates the number of seconds from initTime to now
+var initTime = new Date();
 function getSeconds() {
-    // TODO
+    let currentTime = new Date().getTime()/1000;
+    return currentTime - initTime.getTime()/1000;
 }
 
 // updates timer with current seconds, every second
+var timer = document.getElementById('timer');
 function updateTimer() {
-    // TODO
+    timer.innerHTML = formatSeconds(getSeconds());
 }
 
 // stops timer
@@ -152,7 +162,7 @@ function stopTimer() {
 
 // shows timer, starting its update loop
 function showTimer() {
-    updateTimer();
+    setInterval(updateTimer, 1000);
 }
 
 // inits a new game
