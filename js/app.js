@@ -1,14 +1,10 @@
 // Sintaxis JQUERY: https://stackoverflow.com/questions/4069982/document-getelementbyid-vs-jquery
 // document.getElementById('contents'); //returns a HTML DOM Object
 // var contents = $('#contents');  //returns a jQuery Object
-
+const ID_SEPARATOR = '_';
+const CARDS = ["diamond", "paper-plane-o", "anchor", "bolt", "cube", "leaf", "bicycle", "bomb"];
 // number of movements to hide each star
 var STARS_LEVEL = [15, 25, 35]; // [2, 4, 6];
-/*
- * Create a list that holds all of your cards
- */
-// TODO
-
 
 // Shuffle function from http://stackoverflow.com/a/2450976
 function shuffle(array) {
@@ -21,13 +17,17 @@ function shuffle(array) {
         array[currentIndex] = array[randomIndex];
         array[randomIndex] = temporaryValue;
     }
-
     return array;
 }
 
 // generates LI items inside UL with board id. Shuffle them and create each card.
 function createBoard() {
-    // TODO 
+    let arr = shuffle(CARDS.concat(CARDS));
+    arr = shuffle(arr);
+    let board = document.getElementById('board');
+    for (let i = 0; i < arr.length; i++) {
+        board.innerHTML += createCard(i, arr[i]);
+    }
 }
 
 // generates LI items inside UL with stars id.
@@ -45,7 +45,8 @@ function createStar(index) {
 
 // init variables for a new game
 function initCounters() {
-    // TODO
+    moves = 0;
+    timer.innerHTML = formatSeconds(0);
 }
 
 // adds listeners for cards and reset button
@@ -65,6 +66,7 @@ function addListeners() {
 }
 
 // manages user movement, for both span or li events.
+var openedCard = null;
 function manageMovement(card) {
     showCard(card);
     if (openedCard == null) {
@@ -86,51 +88,60 @@ function manageMovement(card) {
 
 // prepares card id using index and symbol
 function generateId(index, symbol) {
-    return index+'_'+symbol;
+    return 'card' + index+ ID_SEPARATOR +symbol;
 }
 
 // extracts symbol from card id
 function getSymbolFromId(card) {
-    return//TODO
+    return card.id.substring(card.id.indexOf('_')+1);
 }
 
 // creates the LI for one card, with card<index>_<symbol> as id, and the symbol as content.
 function createCard(index, symbol) {
-    let resID = generateId(index, symbol);
     let out = '';
-    out += '<li class="card">' + '\n';
-    out += '   <i class="fa fa-'+getSymbolFromId(resID)+'" id="'+resID+'"></i>' + '\n';
+    out += '<li class="card" id="'+generateId(index, symbol)+'">' + '\n';
+    out += '   <i class="fa fa-'+symbol+'" id="card"></i>' + '\n';
     out += '</li>';
+    return out;
 }
 
  // makes a card visible
 function showCard(card) {
-    // TODO
+    // class shows makes the icon visible. class open changes background color.
+	$('#' + card.id).toggleClass("show open");
 }
 
 // keeps a card visible after matching
 function showMatchedCard(card) {
-    // TODO
+    $('#' + card.id).toggleClass("matched"); 
 }
 
 // shows matched cards and does necessary business to control the end of the game
 function lockCards(card1, card2) {
-    // TODO
+    showMatchedCard(card1);
+    showMatchedCard(card2);
 }
 
 // shows failed color, and half a second later, hides the card
 function showFailedCard(card) {
-    // TODO
+    $('#' + card.id).toggleClass("failed"); 
 }
 
 // hides the two cards
 function hideCards(card1, card2) {
-    // TODO
+    showFailedCard(card1);
+    showFailedCard(card2);
+    setTimeout (() => {
+        $('#' + card1.id).toggleClass("show open failed"); 
+        $('#' + card2.id).toggleClass("show open failed"); 
+        }, 500);
 }
 
 // increments movement counter, updates UI: number of movements and stars
+var moves = 0;
 function incrementMoves() {
-    // TODO
+    moves++
+    document.getElementById('counter').innerHTML = moves;
 }
 
 // formats seconds to mm:ss
@@ -167,8 +178,8 @@ function showTimer() {
 
 // inits a new game
 function initGame() {
-    createBoard();
     createStars();
+    createBoard();
     initCounters();
     addListeners();
     showTimer();
