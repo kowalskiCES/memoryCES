@@ -3,8 +3,13 @@
 // var contents = $('#contents');  //returns a jQuery Object
 const ID_SEPARATOR = '_';
 const CARDS = ["diamond", "paper-plane-o", "anchor", "bolt", "cube", "leaf", "bicycle", "bomb"];
+const INCORRECT_TIMEOUT = 500;
 // number of movements to hide each star
-var STARS_LEVEL = [15, 25, 35]; // [2, 4, 6];
+var STARS_LEVEL = [15, 25, 35]; //[2, 4, 6];
+var moves = 0;
+var initTime = new Date();
+var guessed = 0;
+var startsCounter;
 
 // Shuffle function from http://stackoverflow.com/a/2450976
 function shuffle(array) {
@@ -35,18 +40,22 @@ var starsLocation = document.getElementById('stars');
 function createStars() {
     for (let i = 0; i < STARS_LEVEL.length; i++) {
         starsLocation.innerHTML += createStar(i);
+        ++startsCounter;
     }
 }
 
 // creates the LI for one star
 function createStar(index) {
-   return '<li><i class="fa fa-star star' + index + '"></i></li>';
+   return '<li><i class="fa fa-star" id="star' + index + '"></i></li>';
 }
 
 // init variables for a new game
 function initCounters() {
+    initTime = new Date();
     moves = 0;
     timer.innerHTML = formatSeconds(0);
+    guessed = 0;
+    startsCounter = 0;
 }
 
 // adds listeners for cards and reset button
@@ -68,6 +77,7 @@ function addListeners() {
 // manages user movement, for both span or li events.
 var openedCard = null;
 function manageMovement(card) {
+    checkStars();
     showCard(card);
     if (openedCard == null) {
         // first clicked card
@@ -83,6 +93,7 @@ function manageMovement(card) {
             hideCards(card, openedCard);
         }
         openedCard = null;
+        endGame();
     }
 }
 
@@ -113,13 +124,14 @@ function showCard(card) {
 
 // keeps a card visible after matching
 function showMatchedCard(card) {
-    $('#' + card.id).toggleClass("matched"); 
+    $('#' + card.id).toggleClass("match"); 
 }
 
 // shows matched cards and does necessary business to control the end of the game
 function lockCards(card1, card2) {
     showMatchedCard(card1);
     showMatchedCard(card2);
+    guessed++;
 }
 
 // shows failed color, and half a second later, hides the card
@@ -134,11 +146,10 @@ function hideCards(card1, card2) {
     setTimeout (() => {
         $('#' + card1.id).toggleClass("show open failed"); 
         $('#' + card2.id).toggleClass("show open failed"); 
-        }, 500);
+        }, INCORRECT_TIMEOUT);
 }
 
 // increments movement counter, updates UI: number of movements and stars
-var moves = 0;
 function incrementMoves() {
     moves++
     document.getElementById('counter').innerHTML = moves;
@@ -154,7 +165,6 @@ function formatSeconds(seconds)
 }
 
 // calculates the number of seconds from initTime to now
-var initTime = new Date();
 function getSeconds() {
     let currentTime = new Date().getTime()/1000;
     return currentTime - initTime.getTime()/1000;
@@ -176,11 +186,32 @@ function showTimer() {
     setInterval(updateTimer, 1000);
 }
 
+function restartGame() {
+    location.reload();
+}
+
+function checkStars() {
+    let star = STARS_LEVEL.indexOf(moves)
+    console.log(star);
+    if (star != -1) {
+        $('#star' + (STARS_LEVEL.length - 1 - star)).attr('class' ,'fa fa-star-o');
+        --startsCounter;
+    }
+}
+
+ function endGame() {
+    if (guessed >= CARDS.length) {
+        if (window.confirm('Congratulations!! You have won with ' + moves + ' movements in' + formatSeconds(getSeconds()) + '. You are a ' + startsCounter
+        + ' stars player!! \nDo you want to play again?')) {
+            location.reload();
+        };
+    }
+  }
 // inits a new game
 function initGame() {
+    initCounters();
     createStars();
     createBoard();
-    initCounters();
     addListeners();
     showTimer();
 }
